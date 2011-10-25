@@ -63,7 +63,7 @@ main(Args) ->
             %% header and write to "rebar" file.
             %% Without -noshell -noinput escript consumes all input that would
             %% otherwise go to the shell for the next command.
-            Script = <<"#!/usr/bin/env escript\n%%! -noshell -noinput\n",
+            Script = <<"#!/usr/bin/env escript\n%%! -sname rebar -noshell -noinput\n",
                        ZipBin/binary>>,
             case file:write_file("rebar", Script) of
                 ok ->
