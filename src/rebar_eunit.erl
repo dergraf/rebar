@@ -273,10 +273,9 @@ perform_cover(true, Config, BeamFiles, SrcModules) ->
         undefined ->
             {BeamFiles, SrcModules};
         ExclMods ->
-            {
-                [lists:delete(M, BeamFiles) || M <- ExclMods],
-                [lists:delete(M, SrcModules) || M <- ExclMods]
-            }       
+            {_, NB} = lists:partition(fun(E)->lists:member(E, ExclMods) end, BeamFiles),
+            {_, NS} = lists:partition(fun(E)->lists:member(E, ExclMods) end, SrcModules),
+            {NB, NS}   
     end,    
     cover_analyze(Config, NewBeamFiles, NewSrcModules).
 
