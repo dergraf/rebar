@@ -186,12 +186,18 @@ expand_code_path() ->
 %% The end of form $FOO is delimited with whitespace or eol
 %%
 expand_env_variable(InStr, VarName, RawVarValue) ->
-    ReOpts = [global, {return, list}],
-    VarValue = re:replace(RawVarValue, "\\\\", "\\\\\\\\", ReOpts),
-    R1 = re:replace(InStr, "\\\$" ++ VarName ++ "\\s", VarValue ++ " ",
-                    [global]),
-    R2 = re:replace(R1, "\\\$" ++ VarName ++ "\$", VarValue),
-    re:replace(R2, "\\\${" ++ VarName ++ "}", VarValue, ReOpts).
+    case string:chr(InStr, $$) of
+        0 ->
+            %% No variables to expand
+            InStr;
+        _ ->
+            VarValue = re:replace(RawVarValue, "\\\\", "\\\\\\\\", [global]),
+            %% Use a regex to match/replace:
+            %% Given variable "FOO": match $FOO\s | $FOOeol | ${FOO}
+            RegEx = io_lib:format("\\\$(~s(\\s|$)|{~s})", [VarName, VarName]),
+            ReOpts = [global, {return, list}],
+            re:replace(InStr, RegEx, [VarValue, "\\2"], ReOpts)
+    end.
 
 
 %% ====================================================================
